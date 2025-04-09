@@ -62,6 +62,15 @@ void    array_freea (array_t* arr); // Frees array_t and its allocation
 
 
 /**
+ * Copies an array to another array.
+ * @param array_t* arr_to detination array pointer
+ * @param array_t* arr_from source array pointer
+ * @return void
+ */
+void    array_copy (array_t* arr_to, array_t* arr_from);
+
+
+/**
  * Clears data in array.
  * @param array_t* arr array pointer
  * @return void
@@ -220,6 +229,18 @@ void array_freea (array_t* arr)
 
 // 
 
+void array_copy (array_t* arr_to, array_t* arr_from)
+{
+	memcpy(arr_to, arr_from, sizeof(array_t));
+
+	// Copying arr_from data to arr_to data
+	const uint32_t copy_size = arr_to->size;
+	arr_to->data = malloc(copy_size);
+	memcpy(arr_to->data, arr_from->data, copy_size);
+}
+
+// 
+
 void array_clear (array_t* arr)
 {
 	memset(arr->data, 0, arr->size);
@@ -285,12 +306,15 @@ void array_rem (array_t* arr, uint32_t loc)
 
 void array_remf (array_t* arr)
 {
-	arr->count--;
+	// Compared to array_reml, array_remf don't decrease count,
+	// because array_rem already does this
 	array_rem(arr, 0);
 }
 
 void array_reml (array_t* arr)
 {
+	// Decreasing count because array_mset doesn't
+	// (And also before calling array_mset because it depends on count)
 	arr->count--;
 	array_mset(arr, arr->count, 0);
 }
@@ -303,7 +327,6 @@ void array_shift (array_t* arr, uint32_t begin)
 	const void* dest = (uint8_t*)(src) - (arr->stride); // No need to get the pointer twice
 	const uint32_t size = (arr->capacity - begin) * arr->stride;
 	memcpy((void*)dest, src, size); // TODO: Remove const from src if it's not needed
-	// memset(array_getp(arr, arr->capacity - 1), 0, arr->stride);
 	array_mset(arr, arr->capacity - 1, 0);
 }
 
