@@ -299,19 +299,12 @@ void array_reml (array_t* arr)
 
 void array_shift (array_t* arr, uint32_t begin)
 {
-	uint32_t loop_idx = begin - 1;
-	uint32_t loop_end = arr->capacity;
-
-	while (++loop_idx != loop_end)
-	{
-		if (loop_idx == loop_end - 1)
-		{
-			array_mset(arr, loop_idx, 0);
-			break;
-		}
-
-		array_mcopy(arr, loop_idx, array_getp(arr, loop_idx + 1));
-	}
+	const void* src = array_getp(arr, begin);
+	const void* dest = (uint8_t*)(src) - (arr->stride); // No need to get the pointer twice
+	const uint32_t size = (arr->capacity - begin) * arr->stride;
+	memcpy((void*)dest, src, size); // TODO: Remove const from src if it's not needed
+	// memset(array_getp(arr, arr->capacity - 1), 0, arr->stride);
+	array_mset(arr, arr->capacity - 1, 0);
 }
 
 #endif
